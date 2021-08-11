@@ -8,6 +8,11 @@ body {
   background: linear-gradient(to bottom, #283c86, #45a247);
   background-attachment: fixed;
   height: 100vh;
+  margin: 0;
+}
+
+#particles-js {
+  height: 100%;
 }
 
 #main {
