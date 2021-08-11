@@ -1,1 +1,3 @@
-All of my links in one place
+A collection of HTML/JS doodles
+
+Also has my landing page
