@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+  </head>
+  <body>
+    <style>
+      .main {
+        width: 600px;
+      }
+
+      #picker {
+        width:  100%;
+      }
+
+      #val {
+        margin-bottom: 5px;
+      }
+
+      #sample {
+        width:  50px;
+        height:  50px;
+        background: hsl(200, 100%, 50%);
+      }
+    </style>
+    <script>
+      function setup() {
+          createCanvas(600, 30);
+          noStroke();
+          colorMode(HSB);
+      }
+
+      function draw() {
+          for (let i = 0; i < 256; i++) {
+              fill(i / 256 * 360, 100, 100);
+              rect(600 / 256 * i, 0, 30, height);
+          }
+      }
+
+      function updateT(val) {
+          document.getElementById('val').value=val; 
+          updateC(val);
+      }
+
+      function updateS(val) {
+          document.getElementById('picker').value=val; 
+          updateC(val);
+      }
+
+      function updateC(val) {
+          document.getElementById('sample').style.backgroundColor = `hsl(${val / 256 * 360}, 100%, 50%)`;
+      }
+    </script>
+    <div class="main">
+      <div id="sample"></div>
+      <input type="range" min="0" max="255" value="141" id="picker" onchange="updateT(this.value)">
+      <input type="text" value="141" size="3" id="val" onkeyup="updateS(this.value)">
+    </div>
+  </body>
+</html>
