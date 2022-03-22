@@ -6,7 +6,7 @@
     <body>
         <script type="text/javascript">
             window.onload = function() {
-                let id = document.location.href.split("/").pop();
+                let id = document.location.href.split("?").pop();
                 console.log(id);
                 window.location.href = "osu://b/" + id;
             }
