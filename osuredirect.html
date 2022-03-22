@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>osu! Redirecter</title>
+    </head>
+    <body>
+        <script type="text/javascript">
+            window.onload = function() {
+                let id = document.location.href.split("/").pop();
+                console.log(id);
+                window.location.href = "osu://b/" + id;
+            }
+        </script>
+        <p>Redirecting... if you see this for more than a few seconds something has gone horribly wrong and you should contact Quintec#0689 on Discord</p>
+    </body>
+</html>
