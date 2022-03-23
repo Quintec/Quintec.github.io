@@ -1,3 +1,6 @@
 [submodule "GraphVis"]
 	path = GraphVis
 	url = https://github.com/Quintec/GraphVis
+[submodule "poole"]
+	path = poole
+	url = git@github.com:Quintec/poole.git
