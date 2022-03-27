@@ -3,7 +3,7 @@ title:               Quintec
 tagline:             'writeups and other thoughts'
 description:         'Hello!'
 url:                 http://quintec.github.io
-baseurl:             https://quintec.github.io/blog/
+baseurl:             /blog/
 paginate:            5
 permalink:           pretty
 
