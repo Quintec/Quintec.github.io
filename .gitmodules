@@ -1,6 +1,3 @@
 [submodule "GraphVis"]
 	path = GraphVis
 	url = https://github.com/Quintec/GraphVis
-[submodule "blog"]
-	path = blog
-	url = git@github.com:Quintec/lanyon.git
