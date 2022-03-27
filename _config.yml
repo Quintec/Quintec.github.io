@@ -5,6 +5,7 @@ description:         'Hello!'
 url:                 http://quintec.github.io
 baseurl:             /blog/
 paginate:            5
+paginate-path: '/blog/page:num/'
 permalink:           pretty
 
 # About/contact
