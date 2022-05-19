@@ -108,12 +108,12 @@ class Circuit:
 
 def challenge(req):
     try:
-        req.sendall(b'|--------------------------------|\n'+
-                    b'| Phalcon\'s Accelaration System |\n'+
-                    b'|--------------------------------|\n'+
-                    b'| > Send quantum circuit for the |\n'+
-                    b'| system to analyze...           |\n'+
-                    b'|--------------------------------|\n'+
+        req.sendall(b'\lvert--------------------------------\lvert\n'+
+                    b'\lvert Phalcon\'s Accelaration System \lvert\n'+
+                    b'\lvert--------------------------------\lvert\n'+
+                    b'\lvert > Send quantum circuit for the \lvert\n'+
+                    b'\lvert system to analyze...           \lvert\n'+
+                    b'\lvert--------------------------------\lvert\n'+
                     b'\n> '
                     )
         input = req.recv(4096).decode().strip().split(';')
@@ -188,7 +188,7 @@ def check_Circuit(self):
         return True
 ```
 
-So given 3 inputs $a, b, c$ and 4 total qubits to work with, we need to set the outputs to be $a$, $a \oplus b \oplus c$, and $(a\&b)|(b\&c)|(c\&a)$. And it looks like the only gates that we are able to use are $H, T, TDG$, and $CZ$.
+So given 3 inputs $a, b, c$ and 4 total qubits to work with, we need to set the outputs to be $a$, $a \oplus b \oplus c$, and $(a\&b)\lvert(b\&c)\lvert(c\&a)$. And it looks like the only gates that we are able to use are $H, T, TDG$, and $CZ$.
 
 ## Initial Thoughts
 
@@ -196,7 +196,7 @@ Note the line `self.circuit.measure([0,2,3],[0,1,2])` in the `generate_Circuit` 
 
 The first output is simple by itself - just don't do anything to the input! This is actually a bit tricky once we implement the others, as you soon will see.
 
-The second output needs to be the XOR of all the inputs. It turns out this isn't too hard either - a $CNOT$ (or $CX$) gate effectively performs XOR. (Remember that a $CNOT$ gate flips the second qubit (across the $x$ axis, hence the name $CX$) iff the first qubit is $|1\rangle$.) That is, for classical bits, $\text{CNOT}(a, b)$ takes $(a, b)$ to $(a, a \oplus b)$. There's just one small problem - we aren't allowed $CNOT$ gates! But we are allowed $CZ$ gates, which flips the second qubit across the $z$ axis iff the first qubit is $|1\rangle$. These two operations only differ by an axis, and it turns out that $HZH = X$ (and $HXH = Z$), so we can implement $CNOT$ gates in this way. Remembering that this output needs to be on qubit 2, we can simply apply $CNOT$s with control qubits 0 and 1 targeting qubit 2, which would take $(a, b, c)$ to $(a, b, a \oplus b \oplus c)$ as desired.
+The second output needs to be the XOR of all the inputs. It turns out this isn't too hard either - a $CNOT$ (or $CX$) gate effectively performs XOR. (Remember that a $CNOT$ gate flips the second qubit (across the $x$ axis, hence the name $CX$) iff the first qubit is $\lvert1\rangle$.) That is, for classical bits, $\text{CNOT}(a, b)$ takes $(a, b)$ to $(a, a \oplus b)$. There's just one small problem - we aren't allowed $CNOT$ gates! But we are allowed $CZ$ gates, which flips the second qubit across the $z$ axis iff the first qubit is $\lvert1\rangle$. These two operations only differ by an axis, and it turns out that $HZH = X$ (and $HXH = Z$), so we can implement $CNOT$ gates in this way. Remembering that this output needs to be on qubit 2, we can simply apply $CNOT$s with control qubits 0 and 1 targeting qubit 2, which would take $(a, b, c)$ to $(a, b, a \oplus b \oplus c)$ as desired.
 
 ```python
 qc = QuantumCircuit(4, 3)
@@ -218,7 +218,7 @@ c: 3/════════════════
 """
 ```
 
-The third output is a bit trickier. $(a\&b)|(b\&c)|(c\&a)$ is a complicated expression. While it is possible to construct circuits that simulate AND and OR, the main problem is that to be able to use the value of each input twice, we would need multiple ancillary qubits so that the value of the inputs aren't lost. Instead, it helps to think of the expression as a whole rather than the individual parts. What it's really saying is "set the output bit to $|1\rangle$ if at least 2 of the input bits are $|1\rangle$". Or, if you think about it, "set the output bit to the majority of the input bits". What does this sound like? To me, error correction comes to mind. 
+The third output is a bit trickier. $(a\&b)\lvert(b\&c)\lvert(c\&a)$ is a complicated expression. While it is possible to construct circuits that simulate AND and OR, the main problem is that to be able to use the value of each input twice, we would need multiple ancillary qubits so that the value of the inputs aren't lost. Instead, it helps to think of the expression as a whole rather than the individual parts. What it's really saying is "set the output bit to $\lvert1\rangle$ if at least 2 of the input bits are $\lvert1\rangle$". Or, if you think about it, "set the output bit to the majority of the input bits". What does this sound like? To me, error correction comes to mind. 
 
 The basic single-qubit bit flip error correction circuit looks like this:
 
@@ -232,7 +232,7 @@ q_2: ─────┤ X ├─░──────┤ X ├──■──
           └───┘ ░      └───┘     
 ```
 
-where $q_0$ is the qubit to be transmitted, and $q_1$ and $q_2$ are ancilla qubits which start in state $|0 \rangle$. The first 2 $CNOT$ gates essentially serve to copy the value of $q_0$ into $q_1$ and $q_2$, and then $q_0$ is potentially flipped. After a few more gates, no matter the starting value of $q_0$ and no matter if it is flipped or not, in the end $q_0$ will have the same value it started with. The last gate is a $CCNOT$ gate, a double-controlled not gate, also known as a Toffoli gate, which flips the target ($q_0$) iff both inputs ($q_1$ and $q_2$) are $|1 \rangle$. It basically acts like an AND gate. 
+where $q_0$ is the qubit to be transmitted, and $q_1$ and $q_2$ are ancilla qubits which start in state $\lvert0 \rangle$. The first 2 $CNOT$ gates essentially serve to copy the value of $q_0$ into $q_1$ and $q_2$, and then $q_0$ is potentially flipped. After a few more gates, no matter the starting value of $q_0$ and no matter if it is flipped or not, in the end $q_0$ will have the same value it started with. The last gate is a $CCNOT$ gate, a double-controlled not gate, also known as a Toffoli gate, which flips the target ($q_0$) iff both inputs ($q_1$ and $q_2$) are $\lvert1 \rangle$. It basically acts like an AND gate. 
 
 Now it turns out if you disregard the first half of the circuit (copying $q_0$ into $q_1$ and $q_2$), this circuit does exactly what we want it to. Try it yourself for some random inputs if you're not convinced - it will set $q_0$ to the majority bit. Now how do we implement this? I've already shown how to implement $CNOT$ gates above, and for the $CCNOT$ gate, you could either look it up, or use qiskit's `decompose` function to decompose it into gates we know how to make.
 
@@ -319,17 +319,50 @@ qc.measure([0,2,3],[0,1,2])
 
 qc.draw()
 """
-     ┌───┐           ┌───┐                                                                       ┌───┐               ┌───┐   ┌───┐              ┌─┐        
-q_0: ┤ H ├─────────■─┤ H ├──────────────────────────■─────────────────────────────────────■───■──┤ T ├─────────────■─┤ H ├─■─┤ H ├─────────■────┤M├────────
-     ├───┤         │ └───┘┌───┐                     │                   ┌───┐ ┌───┐       │   │  ├───┤┌─────┐┌───┐ │ ├───┤ │ ├───┤   ┌───┐ │    └╥┘        
-q_1: ┤ H ├─────────┼───■──┤ H ├─■───────────────────┼─────────────────■─┤ T ├─┤ H ├───────┼───■──┤ H ├┤ TDG ├┤ H ├─■─┤ H ├─┼─┤ H ├─■─┤ H ├─┼──■──╫─────────
-     └───┘         │   │  └───┘ │                   │                 │ └───┘ └───┘       │      └───┘└─────┘└───┘   └───┘ │ └───┘ │ ├───┤ │  │  ║ ┌───┐┌─┐
-q_2: ──────■───────┼───┼────────┼───────────────────┼─────────────────┼───────────────────┼────────────────────────────────■───────■─┤ H ├─■──■──╫─┤ H ├┤M├
-     ┌───┐ │ ┌───┐ │   │        │ ┌───┐┌─────┐┌───┐ │ ┌───┐┌───┐┌───┐ │ ┌───┐┌─────┐┌───┐ │ ┌───┐┌───┐ ┌───┐  ┌─┐                    └───┘       ║ └───┘└╥┘
-q_3: ┤ H ├─■─┤ H ├─■───■────────■─┤ H ├┤ TDG ├┤ H ├─■─┤ H ├┤ T ├┤ H ├─■─┤ H ├┤ TDG ├┤ H ├─■─┤ H ├┤ T ├─┤ H ├──┤M├────────────────────────────────╫───────╫─
-     └───┘   └───┘                └───┘└─────┘└───┘   └───┘└───┘└───┘   └───┘└─────┘└───┘   └───┘└───┘ └───┘  └╥┘                                ║       ║ 
-c: 3/══════════════════════════════════════════════════════════════════════════════════════════════════════════╩═════════════════════════════════╩═══════╩═
-                                                                                                               2                                 0       1 
+     ┌───┐           ┌───┐                    »
+q_0: ┤ H ├─────────■─┤ H ├────────────────────»
+     ├───┤         │ └───┘┌───┐               »
+q_1: ┤ H ├─────────┼───■──┤ H ├─■─────────────»
+     └───┘         │   │  └───┘ │             »
+q_2: ──────■───────┼───┼────────┼─────────────»
+     ┌───┐ │ ┌───┐ │   │        │ ┌───┐┌─────┐»
+q_3: ┤ H ├─■─┤ H ├─■───■────────■─┤ H ├┤ TDG ├»
+     └───┘   └───┘                └───┘└─────┘»
+c: 3/═════════════════════════════════════════»
+                                              »
+«                                                »
+«q_0: ──────■────────────────────────────────────»
+«           │                   ┌───┐ ┌───┐      »
+«q_1: ──────┼─────────────────■─┤ T ├─┤ H ├──────»
+«           │                 │ └───┘ └───┘      »
+«q_2: ──────┼─────────────────┼──────────────────»
+«     ┌───┐ │ ┌───┐┌───┐┌───┐ │ ┌───┐┌─────┐┌───┐»
+«q_3: ┤ H ├─■─┤ H ├┤ T ├┤ H ├─■─┤ H ├┤ TDG ├┤ H ├»
+«     └───┘   └───┘└───┘└───┘   └───┘└─────┘└───┘»
+«c: 3/═══════════════════════════════════════════»
+«                                                »
+«             ┌───┐               ┌───┐   ┌───┐»
+«q_0: ─■───■──┤ T ├─────────────■─┤ H ├─■─┤ H ├»
+«      │   │  ├───┤┌─────┐┌───┐ │ ├───┤ │ ├───┤»
+«q_1: ─┼───■──┤ H ├┤ TDG ├┤ H ├─■─┤ H ├─┼─┤ H ├»
+«      │      └───┘└─────┘└───┘   └───┘ │ └───┘»
+«q_2: ─┼────────────────────────────────■──────»
+«      │ ┌───┐┌───┐ ┌───┐  ┌─┐                 »
+«q_3: ─■─┤ H ├┤ T ├─┤ H ├──┤M├─────────────────»
+«        └───┘└───┘ └───┘  └╥┘                 »
+«c: 3/══════════════════════╩══════════════════»
+«                           2                  »
+«                   ┌─┐        
+«q_0: ─────────■────┤M├────────
+«        ┌───┐ │    └╥┘        
+«q_1: ─■─┤ H ├─┼──■──╫─────────
+«      │ ├───┤ │  │  ║ ┌───┐┌─┐
+«q_2: ─■─┤ H ├─■──■──╫─┤ H ├┤M├
+«        └───┘       ║ └───┘└╥┘
+«q_3: ───────────────╫───────╫─
+«                    ║       ║ 
+«c: 3/═══════════════╩═══════╩═
+«                    0       1 
 """
 ```
 
