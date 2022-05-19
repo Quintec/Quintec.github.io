@@ -261,7 +261,7 @@ from qiskit.extensions import *
 
 qc = QuantumCircuit(4, 3)
 
-#copy qubit 3 to qubit 2
+#copy qubit 2 to qubit 3
 qc.h(3)
 qc.cz(2, 3)
 qc.h(3)
