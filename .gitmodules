@@ -1,3 +1,6 @@
 [submodule "GraphVis"]
 	path = GraphVis
 	url = https://github.com/Quintec/GraphVis
+[submodule "chess-opening-kata"]
+	path = chess-opening-kata
+	url = git@github.com:Quintec/chess-opening-kata.git
